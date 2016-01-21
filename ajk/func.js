@@ -1,7 +1,11 @@
 var bookmark = angular.module('bookmark',['firebase']);
+
 bookmark.controller("Ctrl", function ($scope, $firebaseArray) {
 	$scope.url;
 	$scope.fbname;
+	$scope.pagetitle;
+	
+
 	var firebaseURL = "https://jerkinbookmark.firebaseio.com/";
 
 	$scope.getList = function() {
@@ -12,28 +16,43 @@ bookmark.controller("Ctrl", function ($scope, $firebaseArray) {
  		} 		
  		else{
  			$scope.login=true;
-
  		}
     };
-    $scope.add = function() { 
-
-	    	if($scope.$authData != null){
-	    		$scope.urlArr.$add({
-	    		url: $scope.url.text,
-	    		title: "무제",
-
-	  		});
-	  		$scope.url.text='';
-    	}
 
 
-  		
-    };
+    
+
+
+	$scope.add = function() { 
+		if($scope.$authData != null){
+	    		if($scope.checkform.url.$valid){
+	    			var url = $scope.url.text;
+	    			$.ajax({
+					  	dataType:'json',
+					 	url: "./getURLTitle.php?url=" + url,
+					  	success: function(data) {
+					     //do stuff here with the result
+					     	console.log(data);
+						    $scope.pagetitle=data.substring(7);
+							$scope.urlArr.$add({
+								url: $scope.url.text,
+								title: $scope.pagetitle
+							});
+							$scope.url.text='';
+							$scope.pagetitle='';
+ 						 }   
+					});
+	    		}
+	    }
+
+	};
 
 
     $scope.remove = function (url) {
       $scope.urlArr.$remove(url);
     };
+
+
 
 	$scope.FBLogin = function () {
 	      var ref = new Firebase(firebaseURL);
